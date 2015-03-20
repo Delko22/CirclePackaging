@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class LAHC {
 
@@ -37,4 +40,16 @@ public class LAHC {
 		}
 	}
 	
+	public static void main(String[] args) {
+		Circle outerCircle = new Circle(100, 0, 0);
+		List<Circle> innerCircles = new ArrayList<Circle>();
+		innerCircles.add(new Circle(50,0,0));
+		innerCircles.add(new Circle(20, 10, 10));
+		Configuration configuration = new Configuration(outerCircle, innerCircles);
+		Frame frame = new Frame();
+		frame.setConfiguration(configuration);
+		frame.paint(null);
+		configuration.getOuterCircle().setRadius(200);
+		frame.repaint();
+	}
 }
