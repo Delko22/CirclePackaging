@@ -89,7 +89,6 @@ public class LAHC {
 		List<Circle> circles = config.getInnerCircles();
 
 		int indexCircle = (int) Math.round(Math.random()*(circles.size()-1));
-		System.out.println(circles.size());
 		Circle circle = circles.get(indexCircle);
 		List<Circle> copyCircles = new ArrayList<Circle>(circles);
 		copyCircles.remove(indexCircle);
@@ -148,7 +147,8 @@ public class LAHC {
 		{
 			cost = restCircles.get(i).getRadius() + testCircle.getRadius() 
 					- Math.sqrt(Math.pow((testCircle.getX() - restCircles.get(i).getX()), 2) 
-					+ Math.pow((testCircle.getY() - restCircles.get(i).getY()), 2));
+					+ Math.pow((testCircle.getY() - restCircles.get(i).getY()), 2))
+					+ Math.sqrt(Math.pow((testCircle.getX() + testCircle.getY()), 2)) + testCircle.getRadius() - 1;
 			if ( cost > 0 )
 				indices.put(i, cost);
 		}
