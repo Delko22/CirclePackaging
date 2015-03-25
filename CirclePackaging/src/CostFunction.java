@@ -3,6 +3,13 @@ import java.util.List;
 
 public class CostFunction {
 	
+	/*	Kost omlaag indien er contact is met een andere cirkel
+	 * 	waarbij de kost meer omlaag gaat indien het contact met de
+	 * 	buitenste cirkel is. Dus dit wordt geprefereerd.
+	 * 
+	 * 	Kost omhoog indien er overlap is met een andere cirkel
+	 */
+	
 	public CostFunction() {}
 	
 	public double calculateCostFunction(Configuration C)

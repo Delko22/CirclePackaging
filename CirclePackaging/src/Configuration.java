@@ -11,15 +11,33 @@ public class Configuration {
 		this.outerCircle = outerCircle;
 		this.innerCircles = innerCircles;
 	}
+	
+	public Configuration(Circle outerCircle)
+	{
+		this.outerCircle = outerCircle;
+	}
 
 	public Circle getOuterCircle() {
-		// TODO Auto-generated method stub
 		return outerCircle;
 	}
 
 	public List<Circle> getInnerCircles() {
-		// TODO Auto-generated method stub
 		return innerCircles;
+	}
+	
+	public void setInnerCircles(List<Circle> innerCircles)
+	{
+		this.innerCircles = innerCircles;
+	}
+	
+	public void setOuterCircle(Circle outerCircle)
+	{
+		this.outerCircle = outerCircle;
+	}
+	
+	public void addInner(Circle innerCircle)
+	{
+		this.innerCircles.add(innerCircle);
 	}
 
 }

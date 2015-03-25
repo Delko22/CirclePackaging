@@ -1,5 +1,7 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class LAHC {
@@ -21,22 +23,28 @@ public class LAHC {
 	 */
 	public void doLAHC(int costArrayLength) {
 		CostFunction costFunction = new CostFunction();
-		Configuration initialConfiguration = null; //TODO: initialize configuration
-		double initialCost = costFunction.calculateCostFunction(initialConfiguration);
+		Configuration configuration = null; 
+		
+		configuration = createInitialConfig( xxxxxxxxxxxxxxxxx );
+		
+		double initialCost = costFunction.calculateCostFunction(configuration);
 		double[] costArray = new double[costArrayLength];
 		for(int i = 0; i < costArrayLength; i++){
 			costArray[i] = initialCost;
 		}
 		int steps = 0;
-		while(true) { //TODO: insert stopping condition!
-			Configuration candidate = null; //TODO: construct condidate
+		while(true) { 
+			Configuration candidate = constructCandidate(configuration);
 			double candidateCost = costFunction.calculateCostFunction(candidate);
 			int v = steps % costArrayLength;
-			if(candidateCost <= costArray[v]) {
-				//accept candidate configuration
-			}
+			if( candidateCost <= costArray[v] ) 
+				configuration = candidate;
+			
+			if ( candidateCost == 0 )
+				break;
+			
 			costArray[v] = candidateCost; //Ik denk dat dit hier moet maar ben niet zeker of het niet in de if moet.
-			steps ++;
+			steps++;
 		}
 	}
 	
@@ -51,5 +59,55 @@ public class LAHC {
 		frame.paint(null);
 		configuration.getOuterCircle().setRadius(200);
 		frame.repaint();
+	}
+	
+	public Configuration createInitialConfig(List<Double> radii)
+	{
+		Circle outerCircle = new Circle(1,0,0);
+		Configuration config = new Configuration(outerCircle);
+		
+		for ( double radius : radii )
+		{
+			double x = Math.random()*2 - 1;
+			double y = Math.random()*2 - 1;
+			Circle circle = new Circle(radius,x,y);
+			config.addInner(circle);
+		}
+		
+		return config;
+	}
+	
+	public Configuration constructCandidate(Configuration config)
+	{
+		List<Circle> circles = config.getInnerCircles();
+
+		int indexCircle = (int) Math.round(Math.random()*circles.size());
+		
+		Circle circle = circles.get(indexCircle);
+		circles.remove(indexCircle);
+		
+		int overlap = selectMove(circle, circles);
+		
+		
+			
+	}
+	
+	public double selectMove(Circle testCircle, List<Circle> restCircles)
+	{
+		double cost = 0;
+		Map<Integer,Double> indices = new HashMap<Integer,Double>();
+		
+		for ( int i = 0; i < restCircles.size(); i++ )
+		{
+			cost = restCircles.get(i).getRadius() + testCircle.getRadius() 
+					- Math.sqrt(Math.pow((testCircle.getX() - restCircles.get(i).getX()), 2) 
+					+ Math.pow((testCircle.getY() - restCircles.get(i).getY()), 2));
+			if ( cost > 0 )
+				indices.put(i, cost);
+		}
+		
+		int index = selectIndex(indices);
+		
+		return index;
 	}
 }
