@@ -25,31 +25,32 @@ public class Panel extends JPanel implements ActionListener {
 	}
 	
 	public void paintComponent(Graphics g) {
+		System.out.println("COMPONENT");
 		super.paintComponent(g);
 		g.setColor(Color.BLACK);
 		int r = (int) Math.round(multiplier * configuration.getOuterCircle().getRadius());
-		drawCenteredCircle(g, frameSize/2 ,frameSize/2, r);	
-		//System.out.println(r);
+		drawCenteredCircle(g, frameSize/2 ,frameSize/2, r);
+		g.setColor(Color.RED);
 		for (Circle circle : configuration.getInnerCircles()) {
-			g.setColor(Color.RED);
 			int radius = (int) Math.round(multiplier*circle.getRadius());
 			int x = (int) Math.round(frameSize/2 + multiplier*circle.getX());
 			int y = (int) Math.round(frameSize/2 + multiplier*circle.getY());
-			//System.out.println(radius + " " + x + " " + y);
+			System.out.println(circle.getX() + " " + circle.getY() + " " + circle.getRadius());
+			System.out.println(x + "-" + y + "-" +radius);
 			drawCenteredCircle(g, x ,y, radius);
 		}
 		tm.start();
 	}
 	
 	public void drawCenteredCircle(Graphics g, int x, int y, int r) {
-		x = x-(r/2);
-		y = y-(r/2);
-		g.drawOval(x,y,r,r);
+		x = x-r;
+		y = y-r;
+		g.drawOval(x,y,2*r,2*r);
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		repaint();
+		//repaint();
 	}
 	
 //	public static void main(String[] args) {
