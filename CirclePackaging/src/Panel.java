@@ -49,7 +49,6 @@ public class Panel extends JPanel implements ActionListener {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		tm.restart();
 		if(configurations.size()>0)
 			repaint();
 	}

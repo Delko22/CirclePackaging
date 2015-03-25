@@ -28,7 +28,7 @@ public class LAHC {
 	public void doLAHC(int costArrayLength) {
 		CostFunction costFunction = new CostFunction();
 		Configuration configuration = null; 
-		List<Double> radii = new Reader().readRadii("C:\\Bestanden\\School\\Capita Selecta\\NR10_1-10.txt");
+		List<Double> radii = new Reader().readRadii("/home/katrijne/git/CirclePackaging/CirclePackaging/src/testInstances/NR10_1-10.txt");
 		configuration = createInitialConfig( radii );
 		
 		Panel panel = createPanel();
@@ -47,7 +47,7 @@ public class LAHC {
 			if( candidateCost <= costArray[v] ) {
 				configuration = candidate;
 				panel.setConfiguration(configuration);
-//				System.out.println(configuration);
+				System.out.println("Accepted");
 			}
 			if ( candidateCost == 0 )
 				break;
@@ -75,8 +75,11 @@ public class LAHC {
 		
 		for ( double radius : radii )
 		{
-			double x = Math.random()*2 - 1;
-			double y = Math.random()*2 - 1;
+			double x, y = 0;
+			do {
+				x = Math.random()*2 - 1;
+				y = Math.random()*2 - 1;
+			} while(Math.sqrt(Math.pow(x,2) + Math.pow(y,2)) > 1);
 			Circle circle = new Circle(radius,x,y);
 			config.addInner(circle);
 		}
@@ -198,8 +201,8 @@ public class LAHC {
 			
 		}
 		
-		System.out.println("Move amount x: " + moveX);
-		System.out.println("Move amount Y: " + moveY);
+//		System.out.println("Move amount x: " + moveX);
+//		System.out.println("Move amount Y: " + moveY);
 		
 		List<Circle> newCircles = new ArrayList<Circle>(copyCircles);
 		newCircles.add(circle);
