@@ -13,7 +13,7 @@ public class MoveStrategy {
 	
 	public Integer selectIndex()
 	{
-		int finalIndex = 0;
+		int finalIndex = -1;
 		double maxCost = 0;
 		
 		for ( Entry<Integer,Double> entry : possibleIndices.entrySet() )

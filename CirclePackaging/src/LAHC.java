@@ -28,7 +28,7 @@ public class LAHC {
 	public void doLAHC(int costArrayLength) {
 		CostFunction costFunction = new CostFunction();
 		Configuration configuration = null; 
-		List<Double> radii = new Reader().readRadii("/home/katrijne/git/CirclePackaging/CirclePackaging/src/testInstances/NR10_1-10.txt");
+		List<Double> radii = new Reader().readRadii("C:\\Bestanden\\School\\Capita Selecta\\NR10_1-10.txt");
 		configuration = createInitialConfig( radii );
 		
 		Panel panel = createPanel();
@@ -47,7 +47,7 @@ public class LAHC {
 			if( candidateCost <= costArray[v] ) {
 				configuration = candidate;
 				panel.setConfiguration(configuration);
-				System.out.println(configuration);
+//				System.out.println(configuration);
 			}
 			if ( candidateCost == 0 )
 				break;
@@ -93,13 +93,64 @@ public class LAHC {
 		List<Circle> copyCircles = new ArrayList<Circle>(circles);
 		copyCircles.remove(indexCircle);
 		
+		double moveX = 0;
+		double moveY = 0;
+		
 		int index = selectMove(circle, copyCircles);
 		
-		if ( index == 0 ) {
+		if ( index == -1 ) {
 			constructCandidate(config);
+		}
+		else if (index == 0 )
+		{
+			Circle otherCircle = new Circle(1,0,0);;
+			
+			double changeY;
+			double changeX;
+			double tan;
+			double angle;
+			
+			
+			
+			// move fixed amount if overlap is bigger than the fixed amount
+			if ( circle.getX() < otherCircle.getX() )
+			{
+				changeY = otherCircle.getY() - circle.getY();
+				changeX = otherCircle.getX() - circle.getX();
+				tan = changeY/changeX;
+				angle = 1.0 / Math.tan(tan);
+				
+				moveX = moveAmount * Math.cos(angle);
+				moveY = moveAmount * Math.sin(angle);
+				
+				circle.setX(circle.getX() + moveX);
+
+				if ( circle.getY() < otherCircle.getY() )
+					circle.setY(circle.getY() + moveY); 
+				else
+					circle.setY(circle.getY() - moveY);
+			}
+			else
+			{
+				changeY = circle.getY() - otherCircle.getY();
+				changeX = circle.getX() - otherCircle.getX();
+				tan = changeY/changeX;
+				angle = 1.0 / Math.tan(tan);
+				
+				moveX = moveAmount * Math.cos(angle);
+				moveY = moveAmount * Math.sin(angle);
+				
+				circle.setX(circle.getX() - moveX);
+
+				if ( circle.getY() < otherCircle.getY() )
+					circle.setY(circle.getY() + moveY); 
+				else
+					circle.setY(circle.getY() - moveY);
+			}	
 		}
 		else
 		{
+			index = index - 1;
 			Circle otherCircle = copyCircles.get(index);
 			
 			double changeY;
@@ -114,6 +165,16 @@ public class LAHC {
 				changeX = otherCircle.getX() - circle.getX();
 				tan = changeY/changeX;
 				angle = 1.0 / Math.tan(tan);
+				
+				moveX = moveAmount * Math.cos(angle);
+				moveY = moveAmount * Math.sin(angle);
+				
+				circle.setX(circle.getX() - moveX);
+				
+				if ( circle.getY() < otherCircle.getY() )
+					circle.setY(circle.getY() - moveY); 
+				else
+					circle.setY(circle.getY() + moveY);
 			}
 			else
 			{
@@ -121,18 +182,26 @@ public class LAHC {
 				changeX = circle.getX() - otherCircle.getX();
 				tan = changeY/changeX;
 				angle = 1.0 / Math.tan(tan);
+				
+				moveX = moveAmount * Math.cos(angle);
+				moveY = moveAmount * Math.sin(angle);
+				
+				circle.setX(circle.getX() + moveX);
+
+				if ( circle.getY() < otherCircle.getY() )
+					circle.setY(circle.getY() - moveY); 
+				else
+					circle.setY(circle.getY() + moveY);
 			}
-			
-			double moveX = moveAmount * Math.cos(angle);
-			double moveY = moveAmount * Math.sin(angle);
-			
-			circle.setX(circle.getX() + moveX);
-			circle.setY(circle.getY() + moveY);
+
 			// move amount equal to overlap if overlap is smaller than fixed amount
 			
 		}
 		
-		List<Circle> newCircles = copyCircles;
+		System.out.println("Move amount x: " + moveX);
+		System.out.println("Move amount Y: " + moveY);
+		
+		List<Circle> newCircles = new ArrayList<Circle>(copyCircles);
 		newCircles.add(circle);
 		Configuration newConfig = new Configuration(config.getOuterCircle(), newCircles);
 		return newConfig;			
@@ -147,12 +216,16 @@ public class LAHC {
 		{
 			cost = restCircles.get(i).getRadius() + testCircle.getRadius() 
 					- Math.sqrt(Math.pow((testCircle.getX() - restCircles.get(i).getX()), 2) 
-					+ Math.pow((testCircle.getY() - restCircles.get(i).getY()), 2))
-					+ Math.sqrt(Math.pow((testCircle.getX() + testCircle.getY()), 2)) + testCircle.getRadius() - 1;
+					+ Math.pow((testCircle.getY() - restCircles.get(i).getY()), 2));
 			if ( cost > 0 )
-				indices.put(i, cost);
+				indices.put(i+1, cost);
 		}
 		
+		
+		cost = Math.sqrt(Math.pow((testCircle.getX() + testCircle.getY()), 2)) + testCircle.getRadius() - 1;
+		if ( cost > 0 )
+			indices.put(0, cost);
+				
 		MoveStrategy ms = new MoveStrategy(indices);
 		int index = ms.selectIndex();
 		
