@@ -40,19 +40,21 @@ public class LAHC {
 			costArray[i] = initialCost;
 		}
 		int steps = 0;
-		while(true) { 
-			Configuration candidate = constructCandidate(configuration);
+		//for(int i = 0; i < 100; i ++) {
+		while(true) {
+			Configuration candidate = constructCandidate(new Configuration(configuration));
 			double candidateCost = costFunction.calculateCostFunction(candidate);
 			int v = steps % costArrayLength;
 			if( candidateCost <= costArray[v] ) {
 				configuration = candidate;
 				panel.setConfiguration(configuration);
-				System.out.println("Accepted");
+				System.out.println("Accepted: "+ candidateCost + " <= " + costArray[v]);
+				costArray[v] = candidateCost;
 			}
 			if ( candidateCost == 0 )
 				break;
 			
-			costArray[v] = candidateCost; //Ik denk dat dit hier moet maar ben niet zeker of het niet in de if moet.
+			 //Ik denk dat dit hier moet maar ben niet zeker of het niet in de if moet.
 			steps++;
 		}
 	}
