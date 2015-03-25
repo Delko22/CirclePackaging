@@ -5,6 +5,8 @@ import java.util.Map;
 
 
 public class LAHC {
+	
+	private double moveAmount = 0.2;
 
 	/*
 	 * Produce an initial solution s
@@ -84,15 +86,54 @@ public class LAHC {
 		int indexCircle = (int) Math.round(Math.random()*circles.size());
 		
 		Circle circle = circles.get(indexCircle);
-		circles.remove(indexCircle);
+		List<Circle> copyCircles = circles;
+		copyCircles.remove(indexCircle);
 		
-		int overlap = selectMove(circle, circles);
+		int index = selectMove(circle, copyCircles);
 		
-		
+		if ( index == 0 )
+			constructCandidate(config);
+		else
+		{
+			Circle otherCircle = copyCircles.get(index);
 			
+			double changeY;
+			double changeX;
+			double tan;
+			double angle;
+			
+			// move fixed amount if overlap is bigger than the fixed amount
+			if ( circle.getX() < otherCircle.getX() )
+			{
+				changeY = otherCircle.getY() - circle.getY();
+				changeX = otherCircle.getX() - circle.getX();
+				tan = changeY/changeX;
+				angle = 1.0 / Math.tan(tan);
+			}
+			else
+			{
+				changeY = circle.getY() - otherCircle.getY();
+				changeX = circle.getX() - otherCircle.getX();
+				tan = changeY/changeX;
+				angle = 1.0 / Math.tan(tan);
+			}
+			
+			double moveX = moveAmount * Math.cos(angle);
+			double moveY = moveAmount * Math.sin(angle);
+			
+			circle.setX(circle.getX() + moveX);
+			circle.setY(circle.getY() + moveY);
+			// move amount equal to overlap if overlap is smaller than fixed amount
+			
+		}
+		
+		List<Circle> newCircles = copyCircles;
+		newCircles.add(circle);
+		Configuration newConfig = new Configuration(config.getOuterCircle(), newCircles);
+		return newConfig;			
 	}
 	
-	public double selectMove(Circle testCircle, List<Circle> restCircles)
+	public int selectMove(Circle testCircle, List<Circle> restCircles)
 	{
 		double cost = 0;
 		Map<Integer,Double> indices = new HashMap<Integer,Double>();
@@ -106,7 +147,8 @@ public class LAHC {
 				indices.put(i, cost);
 		}
 		
-		int index = selectIndex(indices);
+		MoveStrategy ms = new MoveStrategy(indices);
+		int index = ms.selectIndex();
 		
 		return index;
 	}

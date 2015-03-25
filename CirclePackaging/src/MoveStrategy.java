@@ -13,7 +13,19 @@ public class MoveStrategy {
 	
 	public Integer selectIndex()
 	{
-		for ( Entry<Integer,Double> entry : possibleIndices )
+		int finalIndex = 0;
+		double maxCost = 0;
+		
+		for ( Entry<Integer,Double> entry : possibleIndices.entrySet() )
+		{
+			if ( entry.getValue() > maxCost )
+			{
+				finalIndex = entry.getKey();
+				maxCost = entry.getValue();
+			}
+		}
+		
+		return finalIndex;
 	}
 
 }
