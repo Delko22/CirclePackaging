@@ -12,20 +12,22 @@ import java.util.List;
 
 public class Panel extends JPanel implements ActionListener {
 	
-	private Configuration configuration;
+	private List<Configuration> configurations = new ArrayList<Configuration>();
 	private int frameSize = 960;
-	private Timer tm = new Timer(1,this);
+	private Timer tm = new Timer(120,this);
 	private int multiplier = 200;
 	
 	public Panel() {
 	}
 	
 	public void setConfiguration(Configuration config) {
-		this.configuration = config;
+		configurations.add(new Configuration(config));
+		System.out.println(configurations.size());
 	}
 	
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
+		Configuration configuration = configurations.remove(0);
 		g.setColor(Color.BLACK);
 		int r = (int) Math.round(multiplier * configuration.getOuterCircle().getRadius());
 		drawCenteredCircle(g, frameSize/2 ,frameSize/2, r);
@@ -47,7 +49,9 @@ public class Panel extends JPanel implements ActionListener {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		repaint();
+		tm.restart();
+		if(configurations.size()>0)
+			repaint();
 	}
 	
 //	public static void main(String[] args) {

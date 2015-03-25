@@ -18,6 +18,14 @@ public class Configuration {
 		this.outerCircle = outerCircle;
 		this.innerCircles = new ArrayList<Circle>();
 	}
+	
+	public Configuration(Configuration other) {
+		this.outerCircle = new Circle(other.outerCircle);
+		this.innerCircles = new ArrayList<Circle>();
+		for (Circle c : other.innerCircles){
+			this.innerCircles.add(new Circle(c));
+		}
+	}
 
 	public Circle getOuterCircle() {
 		return outerCircle;

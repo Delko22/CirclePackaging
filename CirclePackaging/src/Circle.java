@@ -11,6 +11,12 @@ public class Circle {
 		this.x = x;
 		this.y = y;
 	}
+	
+	public Circle(Circle other) {
+		this.radius = other.radius;
+		this.x = other.x;
+		this.y = other.y;
+	}
 
 	public double getRadius() {
 		return radius;
