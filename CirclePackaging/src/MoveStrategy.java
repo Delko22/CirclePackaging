@@ -18,6 +18,13 @@ public class MoveStrategy {
 		
 		for ( Entry<Integer,Double> entry : possibleIndices.entrySet() )
 		{
+			if ( entry.getKey() == 0 )
+			{
+				finalIndex = 0;
+				break;
+			}
+			
+			
 			if ( entry.getValue() > maxCost )
 			{
 				finalIndex = entry.getKey();

@@ -26,7 +26,7 @@ public class CostFunction {
 		double cost = 0, totalCost = 0;
 		for ( Circle c : inners )
 		{
-			cost = Math.sqrt(Math.pow((c.getX() + c.getY()), 2)) + c.getRadius() - outer.getRadius();
+			cost = Math.sqrt(Math.pow(c.getX(),2) + Math.pow(c.getY(), 2)) + c.getRadius() - outer.getRadius();
 			if( cost > 0 )
 				totalCost += cost;
 		}

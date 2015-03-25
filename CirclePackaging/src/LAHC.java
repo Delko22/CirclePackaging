@@ -108,9 +108,7 @@ public class LAHC {
 			double changeY;
 			double changeX;
 			double tan;
-			double angle;
-			
-			
+			double angle;			
 			
 			// move fixed amount if overlap is bigger than the fixed amount
 			if ( circle.getX() < otherCircle.getX() )
@@ -126,9 +124,9 @@ public class LAHC {
 				circle.setX(circle.getX() + moveX);
 
 				if ( circle.getY() < otherCircle.getY() )
-					circle.setY(circle.getY() + moveY); 
+					circle.setY(circle.getY() - moveY); 
 				else
-					circle.setY(circle.getY() - moveY);
+					circle.setY(circle.getY() + moveY);
 			}
 			else
 			{
@@ -172,9 +170,9 @@ public class LAHC {
 				circle.setX(circle.getX() - moveX);
 				
 				if ( circle.getY() < otherCircle.getY() )
-					circle.setY(circle.getY() - moveY); 
+					circle.setY(circle.getY() + moveY); 
 				else
-					circle.setY(circle.getY() + moveY);
+					circle.setY(circle.getY() - moveY);
 			}
 			else
 			{
@@ -199,7 +197,7 @@ public class LAHC {
 		}
 		
 		System.out.println("Move amount x: " + moveX);
-		System.out.println("Move amount Y: " + moveY);
+		System.out.println("Move amount Y: " + moveY + "\n");
 		
 		List<Circle> newCircles = new ArrayList<Circle>(copyCircles);
 		newCircles.add(circle);
@@ -222,7 +220,7 @@ public class LAHC {
 		}
 		
 		
-		cost = Math.sqrt(Math.pow((testCircle.getX() + testCircle.getY()), 2)) + testCircle.getRadius() - 1;
+		cost = Math.sqrt(Math.pow(testCircle.getX(),2) + Math.pow(testCircle.getY(), 2)) + testCircle.getRadius() - 1;
 		if ( cost > 0 )
 			indices.put(0, cost);
 				
