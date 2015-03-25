@@ -15,6 +15,7 @@ public class Panel extends JPanel implements ActionListener {
 	private Configuration configuration;
 	private int frameSize = 960;
 	private Timer tm = new Timer(5,this);
+	private int multiplier = 5;
 	
 	public Panel() {
 	}
@@ -27,15 +28,15 @@ public class Panel extends JPanel implements ActionListener {
 		super.paintComponent(g);
 		g.setColor(Color.BLACK);
 		int r = (int) Math.round(configuration.getOuterCircle().getRadius());
-		drawCenteredCircle(g, frameSize/2 ,frameSize/2, r);	
+		drawCenteredCircle(g, frameSize/2 ,frameSize/2, multiplier*r);	
 		//System.out.println(r);
 		for (Circle circle : configuration.getInnerCircles()) {
 			g.setColor(Color.RED);
-			int radius = (int) Math.round(circle.getRadius());
-			int x = (int) Math.round(frameSize/2 + circle.getX());
-			int y = (int) Math.round(frameSize/2 + circle.getY());
+			int radius = multiplier*(int) Math.round(circle.getRadius());
+			int x = (int) Math.round(frameSize/2 + multiplier*circle.getX());
+			int y = (int) Math.round(frameSize/2 + multiplier*circle.getY());
 			//System.out.println(radius + " " + x + " " + y);
-			drawCenteredCircle(g, x ,y, radius);		
+			drawCenteredCircle(g, x ,y, radius);
 		}
 		tm.start();
 	}
@@ -48,7 +49,6 @@ public class Panel extends JPanel implements ActionListener {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		configuration.getOuterCircle().setRadius(configuration.getOuterCircle().getRadius() + 0.1);
 		repaint();
 	}
 	

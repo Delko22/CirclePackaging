@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -15,6 +16,7 @@ public class Configuration {
 	public Configuration(Circle outerCircle)
 	{
 		this.outerCircle = outerCircle;
+		this.innerCircles = new ArrayList<Circle>();
 	}
 
 	public Circle getOuterCircle() {
@@ -38,6 +40,14 @@ public class Configuration {
 	public void addInner(Circle innerCircle)
 	{
 		this.innerCircles.add(innerCircle);
+	}
+	
+	public String toString() {
+		String s = "Configuration\n";
+		for(Circle c : innerCircles) {
+			s +=  c;
+		}
+		return s;
 	}
 
 }

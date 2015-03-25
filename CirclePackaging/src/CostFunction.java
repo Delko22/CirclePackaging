@@ -16,9 +16,9 @@ public class CostFunction {
 	{
 		Circle outerCircle = C.getOuterCircle();
 		List<Circle> innerCircles = C.getInnerCircles();
-		costOuterOverlap(outerCircle, innerCircles);
-		costInnerOverlap(innerCircles);
-		return 0.0; //Hoe werden die twee nu weer gecombineerd?
+		double costOuter = costOuterOverlap(outerCircle, innerCircles);
+		double costInner = costInnerOverlap(innerCircles);
+		return costInner + costOuter; //Hoe werden die twee nu weer gecombineerd?
 	}
 	
 	public double costOuterOverlap(Circle outer, List<Circle> inners)
@@ -27,7 +27,8 @@ public class CostFunction {
 		for ( Circle c : inners )
 		{
 			cost = Math.sqrt(Math.pow((c.getX() + c.getY()), 2)) + c.getRadius() - outer.getRadius();
-			totalCost += cost;
+			if( cost > 0 )
+				totalCost += cost;
 		}
 		
 		return totalCost;
@@ -43,7 +44,8 @@ public class CostFunction {
 				cost = inners.get(j).getRadius() + inners.get(i).getRadius() 
 						- Math.sqrt(Math.pow((inners.get(i).getX() - inners.get(j).getX()), 2) 
 						+ Math.pow((inners.get(i).getY() - inners.get(j).getY()), 2));
-				totalCost += cost;				 
+				if(cost > 0 )
+					totalCost += cost;				 
 			}
 		}
 		

@@ -3,6 +3,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JFrame;
+
 
 public class LAHC {
 	
@@ -26,8 +28,11 @@ public class LAHC {
 	public void doLAHC(int costArrayLength) {
 		CostFunction costFunction = new CostFunction();
 		Configuration configuration = null; 
+		List<Double> radii = new Reader().readRadii("/home/katrijne/git/CirclePackaging/CirclePackaging/src/testInstances/NR10_1-10.txt");
+		configuration = createInitialConfig( radii );
 		
-		configuration = createInitialConfig( xxxxxxxxxxxxxxxxx );
+		Panel panel = createPanel();
+		panel.setConfiguration(configuration);
 		
 		double initialCost = costFunction.calculateCostFunction(configuration);
 		double[] costArray = new double[costArrayLength];
@@ -39,9 +44,11 @@ public class LAHC {
 			Configuration candidate = constructCandidate(configuration);
 			double candidateCost = costFunction.calculateCostFunction(candidate);
 			int v = steps % costArrayLength;
-			if( candidateCost <= costArray[v] ) 
+			if( candidateCost <= costArray[v] ) {
 				configuration = candidate;
-			
+				panel.setConfiguration(configuration);
+				System.out.println(configuration);
+			}
 			if ( candidateCost == 0 )
 				break;
 			
@@ -50,17 +57,15 @@ public class LAHC {
 		}
 	}
 	
-	public static void main(String[] args) {
-		Circle outerCircle = new Circle(100, 0, 0);
-		List<Circle> innerCircles = new ArrayList<Circle>();
-		innerCircles.add(new Circle(50,0,0));
-		innerCircles.add(new Circle(20, 10, 10));
-		Configuration configuration = new Configuration(outerCircle, innerCircles);
-		Frame frame = new Frame();
-		frame.setConfiguration(configuration);
-		frame.paint(null);
-		configuration.getOuterCircle().setRadius(200);
-		frame.repaint();
+	public Panel createPanel() {
+		Panel p = new Panel();
+		JFrame jf = new JFrame();
+		jf.setTitle("Circle Packing Problem");
+		jf.setSize(960,960);
+		jf.setVisible(true);
+		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		jf.add(p);
+		return p;
 	}
 	
 	public Configuration createInitialConfig(List<Double> radii)
@@ -83,16 +88,17 @@ public class LAHC {
 	{
 		List<Circle> circles = config.getInnerCircles();
 
-		int indexCircle = (int) Math.round(Math.random()*circles.size());
-		
+		int indexCircle = (int) Math.round(Math.random()*(circles.size()-1));
+		System.out.println(circles.size());
 		Circle circle = circles.get(indexCircle);
-		List<Circle> copyCircles = circles;
+		List<Circle> copyCircles = new ArrayList<Circle>(circles);
 		copyCircles.remove(indexCircle);
 		
 		int index = selectMove(circle, copyCircles);
 		
-		if ( index == 0 )
+		if ( index == 0 ) {
 			constructCandidate(config);
+		}
 		else
 		{
 			Circle otherCircle = copyCircles.get(index);

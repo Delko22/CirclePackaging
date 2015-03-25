@@ -36,6 +36,8 @@ public class Circle {
 		this.y = y;
 	}
 	
-	
+	public String toString() {
+		return "x: " + this.x + " y: " + this.y + " r: " + this.radius +  "\n";
+	}
 	
 }
