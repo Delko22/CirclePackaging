@@ -43,7 +43,7 @@ public class CostFunction {
 			{
 				cost = inners.get(j).getRadius() + inners.get(i).getRadius() 
 						- Math.sqrt(Math.pow((inners.get(i).getX() - inners.get(j).getX()), 2) 
-						+ Math.pow((inners.get(i).getY() - inners.get(j).getY()), 2));
+									+ Math.pow((inners.get(i).getY() - inners.get(j).getY()), 2));
 				if(cost > 0 )
 					totalCost += cost;				 
 			}

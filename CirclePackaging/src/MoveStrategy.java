@@ -18,7 +18,7 @@ public class MoveStrategy {
 		
 		for ( Entry<Integer,Double> entry : possibleIndices.entrySet() )
 		{
-			if ( entry.getKey() == 0 )
+			if ( entry.getKey() == 0 )			//Ook proberen zonder voorgang te geven aan de outer cirkel
 			{
 				finalIndex = 0;
 				break;

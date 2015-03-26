@@ -14,7 +14,7 @@ public class Panel extends JPanel implements ActionListener {
 	
 	private List<Configuration> configurations = new ArrayList<Configuration>();
 	private int frameSize = 960;
-	private Timer tm = new Timer(2000,this);
+	private Timer tm = new Timer(10,this);
 	private int multiplier = 200;
 	
 	public Panel() {
@@ -22,7 +22,6 @@ public class Panel extends JPanel implements ActionListener {
 	
 	public void setConfiguration(Configuration config) {
 		configurations.add(new Configuration(config));
-		System.out.println(configurations.size());
 	}
 	
 	public void paintComponent(Graphics g) {
