@@ -43,7 +43,7 @@ public class Circle {
 	}
 	
 	public String toString() {
-		return "x: " + this.x + " y: " + this.y + " r: " + this.radius +  "\n";
+		return "x: " + this.x + " y: " + this.y + " r: " + this.radius + "\n";
 	}
 	
 }

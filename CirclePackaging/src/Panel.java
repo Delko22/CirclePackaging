@@ -14,7 +14,7 @@ public class Panel extends JPanel implements ActionListener {
 	
 	private List<Configuration> configurations = new ArrayList<Configuration>();
 	private int frameSize = 960;
-	private Timer tm = new Timer(10,this);
+	private Timer tm = new Timer(100,this);
 	private int multiplier = 200;
 	
 	public Panel() {

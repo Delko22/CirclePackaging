@@ -8,7 +8,8 @@ import javax.swing.JFrame;
 
 public class LAHC {
 	
-	private double moveAmount = 0.2;
+	private double moveAmount = 0.4;
+	private List<Integer> previousCircles = new ArrayList<Integer>();
 
 	/*
 	 * Produce an initial solution s
@@ -28,7 +29,7 @@ public class LAHC {
 	public void doLAHC(int costArrayLength) {
 		CostFunction costFunction = new CostFunction();
 		Configuration configuration = null; 
-		List<Double> radii = new Reader().readRadii("/home/katrijne/git/CirclePackaging/CirclePackaging/src/testInstances/NR10_1-10.txt");//"C:\\Bestanden\\School\\Capita Selecta\\NR10_1-10.txt");
+		List<Double> radii = new Reader().readRadii("C:\\Bestanden\\School\\Capita Selecta\\NR10_1-10.txt");///home/katrijne/git/CirclePackaging/CirclePackaging/src/testInstances/NR10_1-10.txt
 		configuration = createInitialConfig( radii );
 		
 		Panel panel = createPanel();
@@ -44,15 +45,31 @@ public class LAHC {
 			Configuration candidate = constructCandidate(new Configuration(configuration));
 			double candidateCost = costFunction.calculateCostFunction(candidate);
 			int v = steps % costArrayLength;
+			System.out.println(candidateCost);
 			if( candidateCost <= costArray[v] ) {
+				System.out.println("Configuration accepted");
 				configuration = candidate;
-				panel.setConfiguration(configuration);
-				System.out.println(configuration);
+				panel.setConfiguration(configuration);	
+				
+				int prev = previousCircles.get(previousCircles.size()-1);
+				previousCircles.clear();
+				previousCircles.add(prev);
+//				System.out.println(configuration);				
+			}
+			else
+			{
+				System.out.println("Configuration not accepted");
+				if ( previousCircles.size() == 10 )
+				{
+					doRandomMove(configuration);
+					previousCircles.clear();
+				}
 			}
 			if ( candidateCost == 0 )
 				break;
+						
+			costArray[v] = candidateCost;
 			
-			costArray[v] = candidateCost; //Ik denk dat dit hier moet maar ben niet zeker of het niet in de if moet.
 			steps++;
 		}
 	}
@@ -91,91 +108,178 @@ public class LAHC {
 	public Configuration constructCandidate(Configuration config)
 	{
 		List<Circle> circles = config.getInnerCircles();
-
-		int indexCircle = (int) Math.round(Math.random()*(circles.size()-1));
+		
+		int indexCircle = selectCircleToMove(circles);
+//		System.out.println(previousCircle);
+		
+//		System.out.println("Coord voor de move: " + circles.get(indexCircle).toString());
+		
 		Circle circle = circles.get(indexCircle);
 		List<Circle> copyCircles = new ArrayList<Circle>(circles);
 		copyCircles.remove(indexCircle);
 		
 		double moveX = 0;
 		double moveY = 0;
+		double changeY;
+		double changeX;
+		double tan;
+		double angle;
 		
-		int index = selectMove(circle, copyCircles);
+		int index = selectCircleWithMostOverlap(circle, copyCircles);
 		
-		if ( index == -1 ) {
-			return constructCandidate(config);
+		if ( index == -1 ) 
+		{
+			System.out.println("Er is geen overlap gevonden voor: " + indexCircle);
+			int result = testLAHCFinished(copyCircles);
+			
+			if ( result == 1 )
+				return config;
+			
+			double chance = Math.random();
+			if ( chance > 0.1 )	
+				return config;
+			
+			angle = Math.random()*360;			
+			
+			moveX = moveAmount * Math.cos(angle);
+			moveY = moveAmount * Math.sin(angle);
+
+			circle.setX(circle.getX() + moveX);
+			circle.setY(circle.getY() + moveY);
+			
+			return config;
+		}
+
+
+		Circle otherCircle = null;
+		if (index == 0  ) 
+		{
+			otherCircle = new Circle(1,0,0);	
+			System.out.println("Er is overlap gevonden met de buitenste cirkel voor: " + indexCircle);
 		}
 		else {
-			Circle otherCircle = null;
-			if (index == 0 ) {
-				otherCircle = new Circle(1,0,0);
-			}
-			else {
-				index = index - 1;
-				otherCircle = copyCircles.get(index);
-			}			
-			
-			double changeY;
-			double changeX;
-			double tan;
-			double angle;
-			
-			changeY = circle.getY() - otherCircle.getY();
-			changeX = circle.getX() - otherCircle.getX();
-			tan = changeY/changeX; //TODO: what if changeX == 0??
-			angle = Math.atan(tan);
-			
-			double localMoveAmount = moveAmount;
-			double dist = moveAmount;
-			if(index == 0) {
-				dist = calculateDistanceCenters(circle, otherCircle) + circle.getRadius() - otherCircle.getRadius();
-			}
-			else {
-				dist = circle.getRadius() + otherCircle.getRadius() - calculateDistanceCenters(circle, otherCircle);
-			}
-			if(dist < moveAmount ) {
-				localMoveAmount = dist;
-			}
-			
-			moveX = localMoveAmount * Math.cos(angle);
-			moveY = localMoveAmount * Math.sin(angle);
-			
-			// move fixed amount if overlap is bigger than the fixed amount
-			if ( circle.getX() < otherCircle.getX() )
-			{
-				if(index == 0) {
-					circle.setX(circle.getX() + moveX);
-					circle.setY(circle.getY() + moveY);
-				}
-				else {
-					circle.setX(circle.getX() - moveX);
-					circle.setY(circle.getY() - moveY);
-				}
-			}
-			else
-			{
-				if(index == 0) {
-					circle.setX(circle.getX() - moveX);
-					circle.setY(circle.getY() - moveY);
-				}
-				else {
-					circle.setX(circle.getX() + moveX);
-					circle.setY(circle.getY() + moveY);
-				}
+			index = index - 1;
+			otherCircle = copyCircles.get(index);
+			System.out.println("Er is overlap gevonden met de een binnenste cirkel voor: " + indexCircle);
+		}			
+		
+		changeY = circle.getY() - otherCircle.getY();
+		changeX = circle.getX() - otherCircle.getX();
+		if ( changeX == 0 )
+			changeX = 0.000001;
+		tan = changeY/changeX; //TODO: what if changeX == 0??
+		angle = Math.atan(tan);
+		
+		double localMoveAmount = moveAmount;
+		double dist = moveAmount;
+		if(index == 0) 
+			dist = calculateDistanceCenters(circle, otherCircle) + circle.getRadius() - otherCircle.getRadius();		
+		else
+			dist = circle.getRadius() + otherCircle.getRadius() - calculateDistanceCenters(circle, otherCircle);
 				
+		if(dist < moveAmount ) 
+			localMoveAmount = dist;
+		
+		
+		moveX = localMoveAmount * Math.cos(angle);
+		moveY = localMoveAmount * Math.sin(angle);
+		
+		System.out.println("In x-richting: " + moveX + " en in y-richting: " + moveY);
+		
+		if ( circle.getX() < otherCircle.getX() )
+		{
+			if(index == 0) {
+				circle.setX(circle.getX() + moveX);
+				circle.setY(circle.getY() + moveY);
+			}
+			else {
+				circle.setX(circle.getX() - moveX);
+				circle.setY(circle.getY() - moveY);
+			}
+		}
+		else
+		{
+			if(index == 0) {
+				circle.setX(circle.getX() - moveX);
+				circle.setY(circle.getY() - moveY);
+			}
+			else {
+				circle.setX(circle.getX() + moveX);
+				circle.setY(circle.getY() + moveY);
 			}
 			
 		}
+			
+//		System.out.println("Coord na de move: " + circles.get(indexCircle).toString() + "\n");
 		
 //		System.out.println("Move amount x: " + moveX);
 //		System.out.println("Move amount Y: " + moveY + "\n");
 
-		copyCircles.add(circle);
-		Configuration newConfig = new Configuration(config.getOuterCircle(), copyCircles);
-		return newConfig;
+//		copyCircles.add(circle);
+//		Configuration newConfig = new Configuration(config.getOuterCircle(), copyCircles);
+		return config;
 	}
 	
-	public int selectMove(Circle testCircle, List<Circle> restCircles)
+	public int selectCircleToMove(List<Circle> circles)
+	{
+		System.out.println("\n");
+		
+		double cost = 0, finalCost = 0, maxCost = 0;
+		int index = 0, finalIndex = 0;
+		List<Circle> copyCircles;
+		
+		double chance = Math.random();
+		
+		if ( chance < 0.1 )
+		{
+			do			
+				finalIndex = (int) Math.round(Math.random()*(circles.size()-1));			
+			while ( previousCircles.contains(finalIndex) );//	
+			
+			previousCircles.add(finalIndex);
+			System.out.println(previousCircles.toString());
+			return finalIndex;
+		}
+		
+		for ( Circle c : circles )
+		{
+			copyCircles = new ArrayList<Circle>(circles);
+			copyCircles.remove(c);
+			for ( int i = 0; i < copyCircles.size(); i++ )
+			{
+				cost = copyCircles.get(i).getRadius() + c.getRadius() 
+						- Math.sqrt(Math.pow((c.getX() - copyCircles.get(i).getX()), 2) 
+									+ Math.pow((c.getY() - copyCircles.get(i).getY()), 2));
+				if ( cost > 0 )
+					finalCost += cost;
+			}
+		
+		
+			cost = Math.sqrt(Math.pow(c.getX(),2) + Math.pow(c.getY(), 2)) + c.getRadius() - 1;
+			if ( cost > 0 )
+				finalCost += cost;
+			
+			
+			
+			if ( finalCost > maxCost && previousCircles.contains(index) == false )
+			{
+				finalIndex = index;
+				maxCost = finalCost;
+			}
+			
+			System.out.println("Kost voor " + index + " : " + finalCost);
+			
+			index++;
+			finalCost = 0;
+			
+		}
+		
+		previousCircles.add(finalIndex);
+		System.out.println(previousCircles.toString());
+		return finalIndex;		
+	}
+	
+	public int selectCircleWithMostOverlap(Circle testCircle, List<Circle> restCircles)
 	{
 		double cost = 0;
 		Map<Integer,Double> indices = new HashMap<Integer,Double>();
@@ -203,5 +307,45 @@ public class LAHC {
 	public double calculateDistanceCenters(Circle c1, Circle c2) {
 		return  Math.sqrt(Math.pow(( c1.getX() - c2.getX()), 2) 
 						+ Math.pow(( c1.getY() - c2.getY()), 2));
+	}
+	
+	public int testLAHCFinished(List<Circle> circles)
+	{
+		List<Circle> copyCircles;
+		int tempResult, finalResult = 0;
+		
+		for ( Circle c : circles )
+		{
+			copyCircles = new ArrayList<Circle>(circles);
+			copyCircles.remove(c);
+			tempResult = selectCircleWithMostOverlap(c,copyCircles);
+			if ( tempResult != -1 )
+				finalResult++;
+		}
+		
+		if ( finalResult != 0 )
+			return 0;
+		else
+			return 1;
+	}
+	
+	public Configuration doRandomMove(Configuration config)
+	{
+		double angle, moveX, moveY;
+		List<Circle> circles = config.getInnerCircles();
+		
+		int index = (int) Math.round(Math.random()*(circles.size()-1));
+		
+		Circle circle = circles.get(index);
+		
+		angle = Math.random()*360;			
+		
+		moveX = moveAmount * Math.cos(angle);
+		moveY = moveAmount * Math.sin(angle);
+
+		circle.setX(circle.getX() + moveX);
+		circle.setY(circle.getY() + moveY);
+		
+		return config;
 	}
 }
