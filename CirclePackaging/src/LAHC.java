@@ -8,7 +8,7 @@ import javax.swing.JFrame;
 
 public class LAHC {
 	
-	private double moveAmount = 0.1;
+	private double moveAmount = 0.3;
 	private List<Integer> previousCircles = new ArrayList<Integer>();
 
 	/*
@@ -47,31 +47,32 @@ public class LAHC {
 			int v = steps % costArrayLength;
 			System.out.println("De nieuwe kost is: " + candidateCost);
 			if( candidateCost <= costArray[v] ) {
-				System.out.println("Configuration accepted");
-				configuration = candidate;
-				panel.setConfiguration(configuration);	
+//				System.out.println("Configuration accepted");
+				configuration = candidate;				
 				
 				int prev = previousCircles.get(previousCircles.size()-1);
 				previousCircles.clear();
 				previousCircles.add(prev);
-				costArray[v] = candidateCost;
-//				System.out.println(configuration);				
+						
 			}
 			else
 			{
-				System.out.println("Configuration not accepted");
+//				System.out.println("Configuration not accepted");
 				if ( previousCircles.size() == radii.size() )
 				{
 					List<Circle> circles = configuration.getInnerCircles();	
-					swapPerturbation(circles);
+//					swapPerturbation(circles);
 					shiftPerturbation(circles);
 					previousCircles.clear();
 				}
 			}
 			if ( candidateCost == 0 )
-				break;						
+			{
+				panel.setConfiguration(configuration);	
+				break;	
+			}
 			
-			
+			costArray[v] = candidateCost;
 			
 			steps++;
 		}
@@ -110,40 +111,20 @@ public class LAHC {
 	
 	public Configuration constructCandidate(Configuration config)
 	{
-		List<Circle> circles = config.getInnerCircles();
+		double moveX = 0, moveY = 0, changeY, changeX, tan, angle;
 		
+		List<Circle> circles = config.getInnerCircles();		
 		int indexCircle = selectCircleToMove(circles);
-//		System.out.println(previousCircle);
-		
-//		System.out.println("Coord voor de move: " + circles.get(indexCircle).toString());
 		
 		Circle circle = circles.get(indexCircle);
 		List<Circle> copyCircles = new ArrayList<Circle>(circles);
 		copyCircles.remove(indexCircle);
 		
-		double moveX = 0;
-		double moveY = 0;
-		double changeY;
-		double changeX;
-		double tan;
-		double angle;
-		
 		int index = selectCircleWithMostOverlap(circle, copyCircles);
 		
 		if ( index == -1 ) 
 		{
-			System.out.println("Er is geen overlap gevonden voor: " + indexCircle);
-			int result = testLAHCFinished(copyCircles);
-			
-			if ( result == 1 )
-				return config;
-			
-//			if ( previousCircles.size() == config.getInnerCircles().size() )
-//			{
-//				swapPerturbation(circles);
-//				shiftPerturbation(circles);				
-//				previousCircles.clear();
-//			}
+//			System.out.println("Er is geen overlap gevonden voor: " + indexCircle);
 			
 			return config;
 		}
@@ -153,13 +134,13 @@ public class LAHC {
 		if (index == 0  ) 
 		{
 			otherCircle = new Circle(1,0,0);	
-			System.out.println("Er is overlap gevonden met de buitenste cirkel voor: " + indexCircle);
+//			System.out.println("Er is overlap gevonden met de buitenste cirkel voor: " + indexCircle);
 		}
 		else 
 		{
 			index = index - 1;
 			otherCircle = copyCircles.get(index);
-			System.out.println("Er is overlap gevonden met de een binnenste cirkel voor: " + indexCircle);
+//			System.out.println("Er is overlap gevonden met de een binnenste cirkel voor: " + indexCircle);
 		}			
 		
 		changeY = circle.getY() - otherCircle.getY();
@@ -183,7 +164,7 @@ public class LAHC {
 		moveX = localMoveAmount * Math.cos(angle);
 		moveY = localMoveAmount * Math.sin(angle);
 		
-		System.out.println("In x-richting: " + moveX + " en in y-richting: " + moveY);
+//		System.out.println("In x-richting: " + moveX + " en in y-richting: " + moveY);
 		
 		if ( circle.getX() < otherCircle.getX() )
 		{
@@ -210,72 +191,67 @@ public class LAHC {
 		}
 			
 //		System.out.println("Coord na de move: " + circles.get(indexCircle).toString() + "\n");
-		
-//		System.out.println("Move amount x: " + moveX);
-//		System.out.println("Move amount Y: " + moveY + "\n");
 
-//		copyCircles.add(circle);
-//		Configuration newConfig = new Configuration(config.getOuterCircle(), copyCircles);
 		return config;
 	}
 	
 	public int selectCircleToMove(List<Circle> circles)
 	{
-		System.out.println("\n");
+//		System.out.println("\n");
+
+		int finalIndex = 0;
 		
-		double cost = 0, finalCost = 0, maxCost = 0;
-		int index = 0, finalIndex = 0;
-		List<Circle> copyCircles;
-		
-		double chance = Math.random();
-		
-		if ( chance < 0.1 )
-		{
-			do			
-				finalIndex = (int) Math.round(Math.random()*(circles.size()-1));			
-			while ( previousCircles.contains( finalIndex) );//	
-			
-			previousCircles.add(finalIndex);
-			System.out.println(previousCircles.toString());
-			return finalIndex;
-		}
-		
-		for ( Circle c : circles )
-		{
-			copyCircles = new ArrayList<Circle>(circles);
-			copyCircles.remove(c);
-			for ( int i = 0; i < copyCircles.size(); i++ )
-			{
-				cost = copyCircles.get(i).getRadius() + c.getRadius() 
-						- Math.sqrt(Math.pow((c.getX() - copyCircles.get(i).getX()), 2) 
-									+ Math.pow((c.getY() - copyCircles.get(i).getY()), 2));
-				if ( cost > 0 )
-					finalCost += cost;
-			}
-		
-		
-			cost = Math.sqrt(Math.pow(c.getX(),2) + Math.pow(c.getY(), 2)) + c.getRadius() - 1;
-			if ( cost > 0 )
-				finalCost += cost;
-			
-			
-			
-			if ( finalCost > maxCost && previousCircles.contains(index) == false )
-			{
-				finalIndex = index;
-				maxCost = finalCost;
-			}
-			
-//			System.out.println("Kost voor " + index + " : " + finalCost);
-			
-			index++;
-			finalCost = 0;
-			
-		}
+		do			
+			finalIndex = (int) Math.round(Math.random()*(circles.size()-1));			
+		while ( previousCircles.contains( finalIndex) );
 		
 		previousCircles.add(finalIndex);
-		System.out.println(previousCircles.toString());
-		return finalIndex;		
+//			System.out.println(previousCircles.toString());
+		return finalIndex;
+			
+		
+		/*	At the moment a random circle is chosen to move each time. This code 
+		 * 	can be used when you want to move the circle with the most overlap first. 
+		 * 	So the one that has the most overlap with all the other circles. 
+		 */
+//		double cost = 0, finalCost = 0, maxCost = 0;
+//		int index = 0;
+//		List<Circle> copyCircles;	
+//		
+//		for ( Circle c : circles )
+//		{
+//			copyCircles = new ArrayList<Circle>(circles);
+//			copyCircles.remove(c);
+//			for ( int i = 0; i < copyCircles.size(); i++ )
+//			{
+//				cost = copyCircles.get(i).getRadius() + c.getRadius() 
+//						- Math.sqrt(Math.pow((c.getX() - copyCircles.get(i).getX()), 2) 
+//									+ Math.pow((c.getY() - copyCircles.get(i).getY()), 2));
+//				if ( cost > 0 )
+//					finalCost += cost;
+//			}
+//		
+//		
+//			cost = Math.sqrt(Math.pow(c.getX(),2) + Math.pow(c.getY(), 2)) + c.getRadius() - 1;
+//			if ( cost > 0 )
+//				finalCost += cost;			
+//			
+//			if ( finalCost > maxCost && previousCircles.contains(index) == false )
+//			{
+//				finalIndex = index;
+//				maxCost = finalCost;
+//			}
+//			
+////			System.out.println("Kost voor " + index + " : " + finalCost);
+//			
+//			index++;
+//			finalCost = 0;
+//			
+//		}
+//		
+//		previousCircles.add(finalIndex);
+////		System.out.println(previousCircles.toString());
+//		return finalIndex;		
 	}
 	
 	public int selectCircleWithMostOverlap(Circle testCircle, List<Circle> restCircles)

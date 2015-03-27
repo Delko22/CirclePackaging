@@ -14,19 +14,18 @@ public class CostFunction {
 	
 	public double calculateCostFunction(Configuration C)
 	{
-		Circle outerCircle = C.getOuterCircle();
 		List<Circle> innerCircles = C.getInnerCircles();
-		double costOuter = costOuterOverlap(outerCircle, innerCircles);
+		double costOuter = costOuterOverlap(innerCircles);
 		double costInner = costInnerOverlap(innerCircles);
 		return costInner + costOuter; //Hoe werden die twee nu weer gecombineerd?
 	}
 	
-	public double costOuterOverlap(Circle outer, List<Circle> inners)
+	public double costOuterOverlap(List<Circle> inners)
 	{
 		double cost = 0, totalCost = 0;
 		for ( Circle c : inners )
 		{
-			cost = Math.sqrt(Math.pow((c.getX() + c.getY()), 2)) + c.getRadius() - outer.getRadius();
+			cost = Math.sqrt(Math.pow(c.getX(),2) + Math.pow(c.getY(), 2)) + c.getRadius() - 1;
 			if( cost > 0 )
 				totalCost += cost;
 		}
@@ -37,13 +36,17 @@ public class CostFunction {
 	public double costInnerOverlap(List<Circle> inners)
 	{
 		double cost = 0, totalCost = 0;
+		Circle circleA, circleB;
+		
 		for ( int i = 0; i < inners.size(); i++ )
 		{
-			for ( int j = i; j < inners.size(); j++ )
+			for ( int j = i+1; j < inners.size(); j++ )
 			{
-				cost = inners.get(j).getRadius() + inners.get(i).getRadius() 
-						- Math.sqrt(Math.pow((inners.get(i).getX() - inners.get(j).getX()), 2) 
-									+ Math.pow((inners.get(i).getY() - inners.get(j).getY()), 2));
+				circleA = inners.get(i);
+				circleB = inners.get(j);
+				cost = circleB.getRadius() + circleA.getRadius() 
+						- Math.sqrt(Math.pow((circleA.getX() - circleB.getX()), 2) 
+									+ Math.pow((circleA.getY() - circleB.getY()), 2));
 				if(cost > 0 )
 					totalCost += cost;				 
 			}
