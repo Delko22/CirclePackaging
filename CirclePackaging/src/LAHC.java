@@ -8,7 +8,7 @@ import javax.swing.JFrame;
 
 public class LAHC {
 	
-	private double moveAmount = 0.4;
+	private double moveAmount = 0.1;
 	private List<Integer> previousCircles = new ArrayList<Integer>();
 
 	/*
@@ -29,7 +29,7 @@ public class LAHC {
 	public void doLAHC(int costArrayLength) {
 		CostFunction costFunction = new CostFunction();
 		Configuration configuration = null; 
-		List<Double> radii = new Reader().readRadii("C:\\Bestanden\\School\\Capita Selecta\\NR10_1-10.txt");///home/katrijne/git/CirclePackaging/CirclePackaging/src/testInstances/NR10_1-10.txt
+		List<Double> radii = new Reader().readRadii("C:\\Bestanden\\School\\Capita Selecta\\IN9_1-9.txt");///home/katrijne/git/CirclePackaging/CirclePackaging/src/testInstances/NR10_1-10.txt
 		configuration = createInitialConfig( radii );
 		
 		Panel panel = createPanel();
@@ -45,7 +45,7 @@ public class LAHC {
 			Configuration candidate = constructCandidate(new Configuration(configuration));
 			double candidateCost = costFunction.calculateCostFunction(candidate);
 			int v = steps % costArrayLength;
-			System.out.println(candidateCost);
+			System.out.println("De nieuwe kost is: " + candidateCost);
 			if( candidateCost <= costArray[v] ) {
 				System.out.println("Configuration accepted");
 				configuration = candidate;
@@ -54,21 +54,24 @@ public class LAHC {
 				int prev = previousCircles.get(previousCircles.size()-1);
 				previousCircles.clear();
 				previousCircles.add(prev);
+				costArray[v] = candidateCost;
 //				System.out.println(configuration);				
 			}
 			else
 			{
 				System.out.println("Configuration not accepted");
-				if ( previousCircles.size() == 10 )
+				if ( previousCircles.size() == radii.size() )
 				{
-					doRandomMove(configuration);
+					List<Circle> circles = configuration.getInnerCircles();	
+					swapPerturbation(circles);
+					shiftPerturbation(circles);
 					previousCircles.clear();
 				}
 			}
 			if ( candidateCost == 0 )
-				break;
-						
-			costArray[v] = candidateCost;
+				break;						
+			
+			
 			
 			steps++;
 		}
@@ -135,17 +138,12 @@ public class LAHC {
 			if ( result == 1 )
 				return config;
 			
-			double chance = Math.random();
-			if ( chance > 0.1 )	
-				return config;
-			
-			angle = Math.random()*360;			
-			
-			moveX = moveAmount * Math.cos(angle);
-			moveY = moveAmount * Math.sin(angle);
-
-			circle.setX(circle.getX() + moveX);
-			circle.setY(circle.getY() + moveY);
+//			if ( previousCircles.size() == config.getInnerCircles().size() )
+//			{
+//				swapPerturbation(circles);
+//				shiftPerturbation(circles);				
+//				previousCircles.clear();
+//			}
 			
 			return config;
 		}
@@ -157,7 +155,8 @@ public class LAHC {
 			otherCircle = new Circle(1,0,0);	
 			System.out.println("Er is overlap gevonden met de buitenste cirkel voor: " + indexCircle);
 		}
-		else {
+		else 
+		{
 			index = index - 1;
 			otherCircle = copyCircles.get(index);
 			System.out.println("Er is overlap gevonden met de een binnenste cirkel voor: " + indexCircle);
@@ -167,7 +166,7 @@ public class LAHC {
 		changeX = circle.getX() - otherCircle.getX();
 		if ( changeX == 0 )
 			changeX = 0.000001;
-		tan = changeY/changeX; //TODO: what if changeX == 0??
+		tan = changeY/changeX; 
 		angle = Math.atan(tan);
 		
 		double localMoveAmount = moveAmount;
@@ -234,7 +233,7 @@ public class LAHC {
 		{
 			do			
 				finalIndex = (int) Math.round(Math.random()*(circles.size()-1));			
-			while ( previousCircles.contains(finalIndex) );//	
+			while ( previousCircles.contains( finalIndex) );//	
 			
 			previousCircles.add(finalIndex);
 			System.out.println(previousCircles.toString());
@@ -267,7 +266,7 @@ public class LAHC {
 				maxCost = finalCost;
 			}
 			
-			System.out.println("Kost voor " + index + " : " + finalCost);
+//			System.out.println("Kost voor " + index + " : " + finalCost);
 			
 			index++;
 			finalCost = 0;
@@ -329,23 +328,106 @@ public class LAHC {
 			return 1;
 	}
 	
-	public Configuration doRandomMove(Configuration config)
+	/*	This method tries out 4 different moves (left, right, up, down) for every circle 
+	 * 	and performs the shift with the best result (most decrease in cost) on the actual
+	 * 	configuration.
+	 */
+	public void shiftPerturbation(List<Circle> allCircles)
 	{
-		double angle, moveX, moveY;
-		List<Circle> circles = config.getInnerCircles();
+		double angle, moveX, moveY, cost = 0, minCost = 10000;
+		List<Circle> copyCircles = new ArrayList<Circle>(allCircles);
+		Circle c;	
+		int circleIndex = 0, angleIndex = 0;
+		CostFunction costFunction = new CostFunction();
+		Configuration candidate;
 		
-		int index = (int) Math.round(Math.random()*(circles.size()-1));
+		for ( int i = 0; i < copyCircles.size(); i++ )
+		{		
+			c = copyCircles.get(i);
+			
+			for ( int j = 1; j < 5; j++ )
+			{
+				angle = Math.PI*2/4*j;
+				moveX = moveAmount * Math.cos(angle);
+				moveY = moveAmount * Math.sin(angle);
+				
+				c.setX(c.getX() + moveX);
+				c.setY(c.getY() + moveY);
+				
+				candidate = new Configuration(new Circle(1,0,0), copyCircles);
+				cost = costFunction.calculateCostFunction(candidate); 
+				
+				if ( cost < minCost )
+				{
+					circleIndex = i;
+					angleIndex = j;
+					minCost = cost;
+				}
+			}			     
+
+			copyCircles = new ArrayList<Circle>(allCircles);
+		}
 		
-		Circle circle = circles.get(index);
-		
-		angle = Math.random()*360;			
-		
+		c = allCircles.get(circleIndex);
+		angle = Math.PI*2/4*angleIndex;
 		moveX = moveAmount * Math.cos(angle);
 		moveY = moveAmount * Math.sin(angle);
-
-		circle.setX(circle.getX() + moveX);
-		circle.setY(circle.getY() + moveY);
 		
-		return config;
+		c.setX(c.getX() + moveX);
+		c.setY(c.getY() + moveY);
+	}
+	
+	/*	Finds the best two circles to swap and swaps them.
+	 * 	Only circles with sequential radii can be swapped, so first
+	 * 	they are ordered among radius size and then the checks are performed.
+	 */
+	public void swapPerturbation(List<Circle> allCircles)
+	{
+		int index = 0;
+		Circle circleA, circleB;
+		List<Circle> copyCircles;
+		CostFunction costFunction = new CostFunction();
+		Configuration candidate;
+		double cost = 0, minCost = 100000;
+		
+		for ( int i = 0; i < allCircles.size() - 2; i++ )
+		{
+			copyCircles = new ArrayList<Circle>(allCircles);
+			circleA = copyCircles.get(i);
+			circleB = copyCircles.get(i+1);
+			
+			double tempX = circleA.getX();
+			double tempY = circleA.getY();
+			
+			circleA.setX(circleB.getX());
+			circleA.setY(circleB.getY());
+			
+			circleB.setX(tempX);
+			circleB.setY(tempY);
+			
+			candidate = new Configuration(new Circle(1,0,0), copyCircles);
+			
+			cost = costFunction.calculateCostFunction(candidate);      
+			
+			if ( cost < minCost )
+			{
+				index = i;
+				minCost = cost;
+			}
+		}
+			
+		circleA = allCircles.get(index);
+		circleB = allCircles.get(index+1);
+		
+		double tempX = circleA.getX();
+		double tempY = circleA.getY();
+		
+		circleA.setX(circleB.getX());
+		circleA.setY(circleB.getY());
+		
+		circleB.setX(tempX);
+		circleB.setY(tempY);
+		
+		
 	}
 }
